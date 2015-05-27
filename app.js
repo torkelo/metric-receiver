@@ -50,7 +50,7 @@ function sendMetrics() {
 
 setInterval(sendMetrics, intervalMs);
 
-server.post('/receive', function (req, res, next) {
+server.post('/', function (req, res, next) {
   var report = req.body;
 
 	_.each(report.metrics, function(value, key) {
