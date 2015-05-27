@@ -38,10 +38,6 @@ function incrementCounter(name, amount) {
 }
 
 function sendMetrics() {
-  _.each(metrics, function(value, key) {
-	  console.log('key: ' + key + ' = ' + value);
-	});
-
   var client = graphite.createClient(graphiteUrl);
 	client.write(metrics, function(err) {
 	  if (err) {
