@@ -20,7 +20,7 @@ if (!program.graphite || !program.interval) {
 
 var graphiteUrl = 'plaintext://' + program.graphite;
 var intervalMs = parseInt(program.interval) * 1000;
-var prefix = "grafana.usagestats.";
+var prefix = "external.received.";
 
 console.log('Graphite: ' + graphiteUrl);
 console.log('Interval: ' + intervalMs);
@@ -39,7 +39,7 @@ function incrementCounter(name, amount) {
 
 function sendMetrics() {
   _.each(metrics, function(value, key) {
-	  //console.log('key: ' + key + ' = ' + value);
+	  console.log('key: ' + key + ' = ' + value);
 	});
 
   var client = graphite.createClient(graphiteUrl);
@@ -54,25 +54,16 @@ function sendMetrics() {
 
 setInterval(sendMetrics, intervalMs);
 
-server.post('/grafana-usage-report', function (req, res, next) {
+server.post('/receive', function (req, res, next) {
   var report = req.body;
 
-  //console.log('report received: ', report);
-
-  var versionedPrefix = prefix + 'versions.' + report.version + '.';
-  var allPrefix = prefix + 'all.';
-
-  incrementCounter(versionedPrefix + 'reports.count', 1);
-  incrementCounter(allPrefix + 'reports.count', 1);
-
 	_.each(report.metrics, function(value, key) {
-	  incrementCounter(versionedPrefix + key, value);
-	  incrementCounter(allPrefix + key, value);
+	  incrementCounter(prefix + key, value);
 	});
 
 	res.send({message: 'ok'});
 });
 
-server.listen(3540, function () {
+server.listen(3541, function () {
   console.log('%s listening at %s', server.name, server.url);
 });
