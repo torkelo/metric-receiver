@@ -5,7 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "commander": "^2.7.1",
-    "graphite": "0.0.6",
+    "graphite-client": "^1.0.1",
     "lodash": "^3.5.0",
     "restify": "^3.0.1",
     "save": "^2.1.0"

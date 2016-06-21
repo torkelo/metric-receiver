@@ -1,5 +1,5 @@
 var program = require('commander');
-var graphite = require('graphite');
+var Graphite = require('graphite-client');
 var pkg = require('./package.json');
 var _ = require('lodash');
 
@@ -18,12 +18,25 @@ if (!program.graphite || !program.interval) {
   process.exit(1);
 }
 
-var graphiteUrl = 'plaintext://' + program.graphite;
+var graphiteParts = program.graphite.split(':');
+var graphite = new Graphite(graphiteParts[0], parseInt(graphiteParts[1]), 'UTF-8');
 var intervalMs = parseInt(program.interval) * 1000;
 var prefix = "external.received.";
 
-console.log('Graphite: ' + graphiteUrl);
+console.log('Graphite: ' + program.graphite);
 console.log('Interval: ' + intervalMs);
+
+graphite.on('end', function() {
+  console.log('Graphite client disconnected');
+});
+
+graphite.on('error', function(error) {
+  console.log('Graphite connection failure. ' + error);
+});
+
+graphite.connect(function() {
+  console.log('Connected to Graphite server');
+});
 
 server
   .use(restify.fullResponse())
@@ -38,13 +51,9 @@ function incrementCounter(name, amount) {
 }
 
 function sendMetrics() {
-  var client = graphite.createClient(graphiteUrl);
-	client.write(metrics, function(err) {
-	  if (err) {
-	    console.log('graphite error', err);
-	  }
+	graphite.write(metrics, Date.now(), function(err) {
+    console.log('graphite error', err);
 	});
-
 	metrics = {};
 }
 
